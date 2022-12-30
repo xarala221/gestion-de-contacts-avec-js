@@ -1,6 +1,6 @@
 // nous avons un tableau de 3 elements
 
-let contacts = [
+let initialContacts = [
   {
     nom: 'Ousseynou DIOP',
     email: 'oussynou@gmail.com',
@@ -16,9 +16,24 @@ const table = document.querySelector('.table')
 
 const tblBody = document.createElement('tbody')
 
+function getContacts() {
+  const contacts = JSON.parse(localStorage.getItem('contacts'))
+  return contacts
+}
+
+function setContacts(contacts) {
+  localStorage.setItem('contacts', JSON.stringify(contacts))
+}
+
+// nous allons initialiser la liste de contacte
+setContacts(initialContacts)
+
+// ici on recupere les contactes depuis localStorage
+let contacts = getContacts()
+
 // cette fonction permet d'actualiser le nombre de contacte
-function setCount() {
-  countElement.innerHTML = contacts.length
+function setCount(count) {
+  countElement.innerHTML = count
 }
 
 //  nous creeons une fonction qui nous permet de creer une table
@@ -69,7 +84,8 @@ deleteButton.forEach(function (selector) {
     // le resultat apres la suppression
     var filteredArray = removeObjectWithPhone(contacts, phone)
     contacts = filteredArray
-    setCount()
+    setContacts(filteredArray)
+    setCount(filteredArray.length)
   })
 })
 
@@ -115,7 +131,9 @@ addContactButton.onclick = function (event) {
   // creer un nouveau contacte
   const newContact = { nom, email, telephone }
   contacts.push(newContact)
-  setCount()
+  // ajouter le contacte sur le local storage
+  setContacts(contacts)
+  setCount(contacts.length)
   // ajouter un nouveau row
   var row = document.createElement('tr')
   // creer un button
@@ -163,6 +181,8 @@ addContactButton.onclick = function (event) {
   document.getElementById('name').value = ''
   document.getElementById('email').value = ''
   document.getElementById('telephone').value = ''
+  // fermer le modal apres l'ajout
+  modal.style.display = 'none'
 }
 
-setCount()
+setCount(contacts.length)
