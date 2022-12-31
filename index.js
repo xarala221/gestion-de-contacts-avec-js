@@ -1,46 +1,55 @@
-// nous avons un tableau de 3 elements
-
-let contacts = [
-  {
-    nom: 'Ousseynou DIOP',
-    email: 'oussynou@gmail.com',
-    telephone: '779979952',
-  },
-  { nom: 'Awa Gaye', email: 'awagaye@gmail.com', telephone: '779921952' },
-  { nom: 'Abdou Coulibaly', email: 'abdou@gmail.com', telephone: '779925952' },
-]
-
-const countElement = document.querySelector('.count')
-
-const table = document.querySelector('.table')
-
-const tblBody = document.createElement('tbody')
-
-// cette fonction permet d'actualiser le nombre de contacte
-function setCount() {
-  countElement.innerHTML = contacts.length
+// recuperer depuis localstorage
+function getContacts() {
+  return JSON.parse(localStorage.getItem('contacts'))
 }
 
-//  nous creeons une fonction qui nous permet de creer une table
+// um tableau de contatactes
+let initialContacts = getContacts() || []
 
+const countElement = document.querySelector('.count')
+const table = document.querySelector('.table')
+const tblBody = document.createElement('tbody')
+
+// function counter
+function setCount(count) {
+  countElement.innerHTML = count
+}
+
+// ajouter dans localstorage
+function setContacts(contacts) {
+  localStorage.setItem('contacts', JSON.stringify(contacts))
+}
+
+setContacts(initialContacts)
+let contacts = getContacts()
+
+// remplir la table
 function createTable() {
-  for (let j = 0; j < 3; j++) {
-    var row = document.createElement('tr')
-    var buttonCell = document.createElement('td')
+  for (let index = 0; index < contacts.length; index++) {
+    let row = document.createElement('tr')
+    // creer le button de supression
+    let buttonCell = document.createElement('td')
     let deleteButton = document.createElement('button')
-    let deleteButtonText = document.createTextNode('Supprimer')
+    let buttonText = document.createTextNode('Supprimer')
     deleteButton.setAttribute('class', 'delete-btn')
-    deleteButton.appendChild(deleteButtonText)
+    deleteButton.appendChild(buttonText)
 
-    for (var i = 0; i < contacts.length; i++) {
+    for (
+      let element = 0;
+      element < Object.keys(contacts[0]).length;
+      element++
+    ) {
+      // ajouter les td
       const cell = document.createElement('td')
-      const cellText = document.createTextNode(Object.values(contacts[j])[i])
-      cell.appendChild(cellText)
-      deleteButton.setAttribute('contactPhone', contacts[j].telephone)
+      const cellText = document.createTextNode(
+        Object.values(contacts[index])[element]
+      )
+      deleteButton.setAttribute('contactPhone', contacts[index].telephone)
       buttonCell.appendChild(deleteButton)
+      cell.appendChild(cellText)
       row.appendChild(cell)
       row.appendChild(buttonCell)
-      row.setAttribute('id', contacts[j].telephone)
+      row.setAttribute('id', contacts[index].telephone)
     }
     tblBody.appendChild(row)
   }
@@ -51,118 +60,117 @@ function createTable() {
 
 createTable()
 
-var deleteButton = document.querySelectorAll('.delete-btn')
+let deleteButton = document.querySelectorAll('.delete-btn')
 
-// Cette fonction renvoie un nouveau tableau avec lesmfilteres
+deleteButton.forEach(function (button) {
+  button.addEventListener('click', function () {
+    const telephone = this.getAttribute('contactPhone')
 
-function removeObjectWithPhone(arr, phone) {
-  return arr.filter((obj) => obj.telephone !== phone)
-}
-
-// nous allons ajouter un event lister a nos buttons de suppressions
-deleteButton.forEach(function (selector) {
-  selector.addEventListener('click', function () {
-    const phone = this.getAttribute('contactPhone')
-    // on veut supprimer une ligne en se basant sur son ID, qui est le numero de telephone ici
-    var row = document.getElementById(phone)
+    let row = document.getElementById(telephone)
     row.parentNode.removeChild(row)
-    // le resultat apres la suppression
-    var filteredArray = removeObjectWithPhone(contacts, phone)
-    contacts = filteredArray
-    setCount()
+
+    // enlever l'element supprimer
+    let filteredContacts = contacts.filter(
+      (contact) => contact.telephone !== telephone
+    )
+    contacts = filteredContacts
+    setCount(contacts.length)
+    setContacts(contacts)
   })
 })
 
-// Get the modal
-var modal = document.getElementById('contactModal')
+// modal
+let modal = document.getElementById('contactModal')
+let modalButton = document.getElementById('addContactModalButton')
+let close = document.querySelector('.close')
 
-// Get the button that opens the modal
-var modalButton = document.getElementById('addContactModalButton')
-
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName('close')[0]
-
-// When the user clicks the button, open the modal
 modalButton.onclick = function () {
   modal.style.display = 'block'
 }
 
-// When the user clicks on <span> (x), close the modal
-span.onclick = function () {
+close.onclick = function () {
   modal.style.display = 'none'
 }
 
-// When the user clicks anywhere outside of the modal, close it
 window.onclick = function (event) {
   if (event.target == modal) {
     modal.style.display = 'none'
   }
 }
 
-// Add new contact
-const addContactButton = document.querySelector('.addContactButton')
+// ajouter un contact
+let addContactButton = document.querySelector('.addContactButton')
 addContactButton.onclick = function (event) {
   event.preventDefault()
-  // recuperer les informations
-  const nom = document.getElementById('name').value
+  const name = document.getElementById('name').value
   const email = document.getElementById('email').value
   const telephone = document.getElementById('telephone').value
-  // controler si les champs ne sont pas vides
-  if (!nom || !email || !telephone) {
-    alert('Merci de remplir tous les champs!')
+  if (!name || !email || !telephone) {
+    alert('merci de tout remplir')
     return
   }
-  // creer un nouveau contacte
-  const newContact = { nom, email, telephone }
+  const newContact = { name, email, telephone }
   contacts.push(newContact)
-  setCount()
-  // ajouter un nouveau row
-  var row = document.createElement('tr')
-  // creer un button
-  var buttonCell = document.createElement('td')
-  let deleteButton = document.createElement('button')
-  let deleteButtonText = document.createTextNode('Supprimer')
-  deleteButton.setAttribute('class', 'delete-btn')
-  deleteButton.appendChild(deleteButtonText)
+  setCount(contacts.length)
+  setContacts(contacts)
 
-  const cell0 = row.insertCell(0)
-  const cell0Text = document.createTextNode(nom)
+  // ajouter un tr
+  let row = document.createElement('tr')
+
+  let cell0 = row.insertCell(0)
+  const cell0Text = document.createTextNode(name)
   cell0.appendChild(cell0Text)
+  row.appendChild(cell0)
 
-  const cell1 = row.insertCell(1)
+  let cell1 = row.insertCell(1)
   const cell1Text = document.createTextNode(email)
   cell1.appendChild(cell1Text)
+  row.appendChild(cell1)
 
-  const cell2 = row.insertCell(2)
+  let cell2 = row.insertCell(2)
   const cell2Text = document.createTextNode(telephone)
   cell2.appendChild(cell2Text)
-
-  deleteButton.setAttribute('contactPhone', telephone)
-
-  deleteButton.addEventListener('click', function () {
-    const phone = this.getAttribute('contactPhone')
-    // on veut supprimer une ligne en se basant sur son ID, qui est le numero de telephone ici
-    var row = document.getElementById(phone)
-    row.parentNode.removeChild(row)
-    // le resultat apres la suppression
-    var filteredArray = removeObjectWithPhone(contacts, phone)
-    contacts = filteredArray
-    setCount()
-  })
-  buttonCell.appendChild(deleteButton)
-  row.appendChild(cell0)
-  row.appendChild(cell1)
   row.appendChild(cell2)
-  row.appendChild(buttonCell)
-  row.setAttribute('id', telephone)
 
+  // creer le button de supression
+  let buttonCell = document.createElement('td')
+  let deleteButton = document.createElement('button')
+  let buttonText = document.createTextNode('Supprimer')
+  deleteButton.setAttribute('class', 'delete-btn')
+  deleteButton.setAttribute('contactPhone', telephone)
+  deleteButton.appendChild(buttonText)
+
+  // ajouter un evenment
+  deleteButton.addEventListener('click', function () {
+    const telephone = this.getAttribute('contactPhone')
+
+    let row = document.getElementById(telephone)
+    row.parentNode.removeChild(row)
+
+    // enlever l'element supprimer
+    let filteredContacts = contacts.filter(
+      (contact) => contact.telephone !== telephone
+    )
+    contacts = filteredContacts
+    setCount(contacts.length)
+    setContacts(contacts)
+  })
+
+  buttonCell.appendChild(deleteButton)
+
+  row.appendChild(buttonCell)
+
+  row.setAttribute('id', telephone)
   tblBody.appendChild(row)
   table.appendChild(tblBody)
+
+  document.body.appendChild(table)
 
   // vider les inputs
   document.getElementById('name').value = ''
   document.getElementById('email').value = ''
   document.getElementById('telephone').value = ''
+  modal.style.display = 'none'
 }
 
-setCount()
+setCount(contacts.length)
